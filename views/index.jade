@@ -6,6 +6,6 @@ block content
   
   p
     if user
-      a(href="/logout") Logout user: #{user.username}
+      a(href="/logout") Logout user: #{user.username || user.profile.displayName}
     else
       a(href="/login") Login

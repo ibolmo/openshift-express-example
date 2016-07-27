@@ -6,7 +6,10 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
+var FacebookStrategy = require('passport-facebook').Strategy;
 var session = require('express-session');
+
+require('dotenv').config();
 
 var mongoose = require('mongoose');
 mongoose.connect('mongodb://localhost/boot');
@@ -42,6 +45,28 @@ passport.use(new LocalStrategy(function(username, password, cb) {
     return cb(null, user);
   });
 }));
+
+passport.use(new FacebookStrategy({
+  clientID: process.env.FACEBOOK_APP_ID,
+  clientSecret: process.env.FACEBOOK_APP_SECRET,
+  callbackURL: process.env.FACEBOOK_CALLBACK_URL
+}, function(accessToken, refreshToken, profile, cb) {
+    User.findOne({ facebookId: profile.id }, function (err, user) {
+      if (err) cb(err);
+      if (user) return cb(err, user);
+
+      user = new User({
+        facebookId: profile.id,
+        profile: profile
+      });
+
+      user.save(function(err){
+        if (err) return cb(err);
+        cb(null, user);
+      });
+    });
+  }
+));
 
 passport.serializeUser(function(user, cb) {
   cb(null, user._id);

@@ -3,6 +3,11 @@ extends layout
 block content
   h1= title
   
+  p
+    a(href="/auth/facebook") Login with Facebook
+    
+  p or
+  
   form(action="/login", method="post")
     div
       label Username:
