@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1= title
+  
+  p
+    a(href="/auth/facebook") Login with Facebook
+    
+  p or
+  
+  form(action="/login", method="post")
+    div
+      label Username:
+      input(type="text", name="username")
+    div
+      label Password:
+      input(type="password", name="password")
+    div
+      input(type="submit", value="Submit")
