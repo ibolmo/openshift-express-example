@@ -1,8 +1,18 @@
-# openshift-express4
+# OpenShift + Express4 Example
 
-An Example for using Express 4 with Openshift
+This project utilizes most tools/examples talked about in the codergv.org/boot program.
 
-This is a blank template project.
-It is derived from express4 generator template project and openshift default project.
+Students are encouraged to go through the classroom slides to get their projects to the same starting
+point as this repository. If in need of a new starting point, however, you can use this project by:
 
-Just clone the repo ! :)
+```sh
+git clone https://github.com/ibolmo/openshift-express-example.git your-project-name
+cd your-project-name
+npm install
+
+cp .env.example .env
+atom .env && \
+
+# start the server
+gulp
+```
