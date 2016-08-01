@@ -32,6 +32,11 @@ app.io = io = socketio();
 
 io.on('connection', function(socket){
   console.log('Someone connected');
+
+  socket.on('chat message', function(msg){
+    console.log('message: ' + msg);
+    io.emit('chat message', msg);
+  });
 });
 
 app.use(session({

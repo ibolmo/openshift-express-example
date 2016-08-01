@@ -33,6 +33,20 @@ var setUpForm = function(){
 
 var setUpSocket = function(){
   var socket = io();
+
+  var form = document.getElementById('webSocketForm');
+  form.onsubmit = function(e){
+    e.preventDefault();
+    socket.emit('chat message', new FormData(form).get('message'));
+    form.reset();
+  };
+
+  var chat = document.getElementById('chat');
+  socket.on('chat message', function(msg){
+    var li = document.createElement('li');
+    li.innerText = msg;
+    chat.appendChild(li);
+  });
 };
 
 window.onload = function(){

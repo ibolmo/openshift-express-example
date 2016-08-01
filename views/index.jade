@@ -16,12 +16,19 @@ block content
       .success { border: 1px solid green; background: lime; color: green }
       .error { border: 1px solid red; background: pink; color: red }
       
-  h4 Send a message  
+  h4 Send a message via HTTP 
   #status
   form(id="myForm", action="/message", method="post")
     input(type="text", name="message")
     button(type="submit") Submit
     
+  h4 Send a message via WebSocket
+  form(id="webSocketForm")
+    input(type="text", name="message")
+    button(type="submit") Send
+    
+  ul#chat
+  
   script(type='text/javascript', src='/js/index.js')
   script(type='text/javascript', src='/jsonp?callback=console.log')
 
