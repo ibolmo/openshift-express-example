@@ -81,6 +81,7 @@ var AppContainer = function () {
      * Create HTTP server.
      */
     var server = http.createServer(app);
+    app.io.attach(server);
     /**
      * Listen on provided port, on all network interfaces.
      */

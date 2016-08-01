@@ -8,7 +8,10 @@ gulp.task('css', function(){
   gulp.src('public/**/*.css').pipe(livereload());
 });
 
-var jsFiles = ['./node_modules/whatwg-fetch/fetch.js'];
+var jsFiles = [
+  './node_modules/whatwg-fetch/fetch.js',
+  './node_modules/socket.io-client/socket.io.js'
+];
 
 gulp.task('js', function(){
   return gulp.src(jsFiles)

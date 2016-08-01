@@ -8,6 +8,7 @@ var passport = require('passport')
 var LocalStrategy = require('passport-local').Strategy;
 var FacebookStrategy = require('passport-facebook').Strategy;
 var session = require('express-session');
+var socketio = require('socket.io');
 
 require('dotenv').config();
 
@@ -27,6 +28,11 @@ var users = require('./routes/users');
 var courses = require('./routes/courses');
 
 var app = express();
+app.io = io = socketio();
+
+io.on('connection', function(socket){
+  console.log('Someone connected');
+});
 
 app.use(session({
   secret: 'my secret session phrase that needs to be changed',
