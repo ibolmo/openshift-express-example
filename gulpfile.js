@@ -33,6 +33,7 @@ gulp.task('start', function () {
   livereload.listen();
 
   nodemon({
+    verbose: "true",
     script: 'server.js',                // file that starts server
     ext: 'js',                          // which files to restart server
     env: { 'NODE_ENV': 'development' }  // environment variables

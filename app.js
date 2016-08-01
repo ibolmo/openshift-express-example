@@ -12,15 +12,16 @@ var socketio = require('socket.io');
 
 require('dotenv').config();
 
+const DB_NAME = process.env.DB_NAME;
 const MONGO_PASS = process.env.MONGO_DB_PASS;
 const MONGO_HOST = process.env.OPENSHIFT_MONGODB_DB_HOST;
 const MONGO_PORT = process.env.OPENSHIFT_MONGODB_DB_PORT;
 
 var mongoose = require('mongoose');
 if (MONGO_HOST) {
-  mongoose.connect('mongodb://admin:' + MONGO_PASS + '@' + MONGO_HOST + ':' + MONGO_PORT + '/whattoeat');
+  mongoose.connect('mongodb://admin:' + MONGO_PASS + '@' + MONGO_HOST + ':' + MONGO_PORT + '/' + DB_NAME);
 } else {
-  mongoose.connect('mongodb://localhost/whattoeat');
+  mongoose.connect('mongodb://localhost/' + DB_NAME);
 }
 
 var routes = require('./routes/index');
