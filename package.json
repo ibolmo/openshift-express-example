@@ -19,27 +19,27 @@
   "dependencies": {
     "body-parser": "~1.15.1",
     "cookie-parser": "~1.4.3",
-    "mongoose": "^4.5.4",
     "debug": "~2.2.0",
     "dotenv": "^2.0.0",
     "express": "~4.13.4",
     "express-session": "^1.14.0",
     "jade": "~1.11.0",
+    "mongoose": "^4.5.4",
     "morgan": "~1.7.0",
-    "serve-favicon": "~2.3.0",
     "passport": "^0.3.2",
     "passport-facebook": "^2.1.1",
     "passport-local": "^1.0.0",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "whatwg-fetch": "^1.0.0"
   },
   "devDependencies": {
     "express-livereload": "0.0.24",
     "gulp": "^3.9.1",
+    "gulp-concat": "^2.6.0",
     "gulp-livereload": "^3.8.1",
     "gulp-nodemon": "^2.1.0",
     "gulp-wait": "0.0.2"
   },
   "bundleDependencies": [],
-  "private": true,
   "main": "server.js"
 }

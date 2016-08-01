@@ -1,4 +1,5 @@
 var gulp = require('gulp');
+var concat = require('gulp-concat');
 var nodemon = require('gulp-nodemon');
 var livereload = require('gulp-livereload');
 var wait = require('gulp-wait');
@@ -7,8 +8,12 @@ gulp.task('css', function(){
   gulp.src('public/**/*.css').pipe(livereload());
 });
 
+var jsFiles = ['./node_modules/whatwg-fetch/fetch.js'];
+
 gulp.task('js', function(){
-  gulp.src('public/**/*.js').pipe(livereload());
+  return gulp.src(jsFiles)
+    .pipe(concat('main.js'))
+    .pipe(gulp.dest('./public/js/'));
 });
 
 gulp.task('jade', function(){

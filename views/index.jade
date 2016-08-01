@@ -4,8 +4,62 @@ block content
   h1= title
   p Welcome to #{title}
   
+  p#clock
+  
   p
     if user
       a(href="/logout") Logout user: #{user.username || user.profile.displayName}
     else
       a(href="/login") Login
+  
+  style.
+      .success { border: 1px solid green; background: lime; color: green }
+      .error { border: 1px solid red; background: pink; color: red }
+      
+  h4 Send a message  
+  #status
+  form(id="myForm", action="/message", method="post")
+    input(type="text", name="message")
+    button(type="submit") Submit
+    
+  script.
+    var clock = document.getElementById('clock');
+    
+    var updateClock = function(){
+      fetch('/time.json')
+        .then(function(response){
+          return response.json();
+        })
+        .then(function(json){
+          clock.innerText = new Date(Number(json.now));
+        });
+    };
+    
+    var setUpForm = function(){
+      var status = document.getElementById('status');
+      var form = document.getElementById('myForm');
+      
+      form.onsubmit = function(e){
+        e.preventDefault();
+        status.innerText = status.className = '';
+        
+        fetch('/message', {
+          method: 'POST',
+          headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: new FormData(form).get('message') })
+        }).then(function(response){
+          return response.json();  
+        }).then(function(result){
+          status.className = result.status;
+          status.innerText = result.message;
+        });
+      }
+    };
+  
+    window.onload = function(){
+      setInterval(updateClock, 1000);
+      setUpForm();
+    };
+
+  script(type='text/javascript', src='/jsonp?callback=console.log')
+  
