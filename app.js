@@ -1,14 +1,24 @@
-var express = require('express');
-var path = require('path');
-var favicon = require('serve-favicon');
-var logger = require('morgan');
-var cookieParser = require('cookie-parser');
-var bodyParser = require('body-parser');
-var passport = require('passport')
-var LocalStrategy = require('passport-local').Strategy;
-var FacebookStrategy = require('passport-facebook').Strategy;
-var session = require('express-session');
-var socketio = require('socket.io');
+// global io
+
+const express = require('express');
+const path = require('path');
+const logger = require('morgan');
+const cookieParser = require('cookie-parser');
+const bodyParser = require('body-parser');
+const passport = require('passport');
+const favicon = require('serve-favicon');
+const LocalStrategy = require('passport-local').Strategy;
+const FacebookStrategy = require('passport-facebook').Strategy;
+const session = require('express-session');
+const socketio = require('socket.io');
+const mongoose = require('mongoose');
+const debug = require('debug')('app');
+
+const routes = require('./routes/index');
+const users = require('./routes/users');
+const courses = require('./routes/courses');
+
+const User = require('./models/User');
 
 require('dotenv').config();
 
@@ -17,51 +27,43 @@ const MONGO_PASS = process.env.MONGO_DB_PASS;
 const MONGO_HOST = process.env.OPENSHIFT_MONGODB_DB_HOST;
 const MONGO_PORT = process.env.OPENSHIFT_MONGODB_DB_PORT;
 
-var mongoose = require('mongoose');
 if (MONGO_HOST) {
-  mongoose.connect('mongodb://admin:' + MONGO_PASS + '@' + MONGO_HOST + ':' + MONGO_PORT + '/' + DB_NAME);
+  mongoose.connect(`mongodb://admin:${MONGO_PASS}@${MONGO_HOST}:${MONGO_PORT}/${DB_NAME}`);
 } else {
-  mongoose.connect('mongodb://localhost/' + DB_NAME);
+  mongoose.connect(`mongodb://localhost/${DB_NAME}`);
 }
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-var courses = require('./routes/courses');
+const app = express();
+const io = global.io = app.io = socketio();
 
-var app = express();
-app.io = io = socketio();
+io.on('connection', (socket) => {
+  debug('Someone connected');
 
-io.on('connection', function(socket){
-  console.log('Someone connected');
-
-  socket.on('chat message', function(msg){
-    console.log('message: ' + msg);
+  socket.on('chat message', (msg) => {
+    debug(`message: ${msg}`);
     io.emit('chat message', msg);
   });
 });
 
 app.use(session({
-  secret: 'my secret session phrase that needs to be changed',
+  secret: process.env.SESSION_SECRET,
   resave: false,
-  saveUninitialized: false
+  saveUninitialized: false,
 }));
 
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.get('*', function(req, res, next){
-  res.locals.user = req.user;
+app.get('*', (req, res, next) => {
+  res.locals.user = req.user; // eslint-disable-line no-param-reassign
   next();
 });
 
-var User = require('./models/User');
-passport.use(new LocalStrategy(function(username, password, cb) {
-  User.findOne({ username: username }, function(err, user) {
+passport.use(new LocalStrategy((username, password, cb) => {
+  User.findOne({ username }, (err, user) => {
     if (err) return cb(err);
     if (!user) return cb(null, false);
-    console.log(user.password, password);
-
-    if (user.password != password) return cb(null, false);
+    if (user.password !== password) return cb(null, false);
     return cb(null, user);
   });
 }));
@@ -69,33 +71,39 @@ passport.use(new LocalStrategy(function(username, password, cb) {
 passport.use(new FacebookStrategy({
   clientID: process.env.FACEBOOK_APP_ID,
   clientSecret: process.env.FACEBOOK_APP_SECRET,
-  callbackURL: process.env.FACEBOOK_CALLBACK_URL
-}, function(accessToken, refreshToken, profile, cb) {
-    User.findOne({ facebookId: profile.id }, function (err, user) {
-      if (err) cb(err);
-      if (user) return cb(err, user);
+  callbackURL: process.env.FACEBOOK_CALLBACK_URL,
+}, (accessToken, refreshToken, profile, cb) => {
+  User.findOne({ facebookId: profile.id }, (err, user) => {
+    if (err) {
+      cb(err);
+    } else if (user) {
+      cb(err, user);
+    }
 
-      user = new User({
-        facebookId: profile.id,
-        profile: profile
-      });
-
-      user.save(function(err){
-        if (err) return cb(err);
-        cb(null, user);
-      });
+    const newUser = new User({
+      facebookId: profile.id,
+      profile,
     });
-  }
-));
 
-passport.serializeUser(function(user, cb) {
-  cb(null, user._id);
-});
+    newUser.save((newUserError) => {
+      if (newUserError) {
+        cb(newUserError);
+      } else {
+        cb(null, newUser);
+      }
+    });
+  });
+}));
 
-passport.deserializeUser(function(id, cb) {
-  User.findOne(id, function (err, user) {
-    if (err) { return cb(err); }
-    cb(null, user);
+passport.serializeUser((user, cb) => cb(null, user._id)); // eslint-disable-line
+
+passport.deserializeUser((id, cb) => {
+  User.findOne(id, (err, user) => {
+    if (err) {
+      cb(err);
+    } else {
+      cb(null, user);
+    }
   });
 });
 
@@ -103,9 +111,7 @@ passport.deserializeUser(function(id, cb) {
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
-// uncomment after placing your favicon in /public
-//app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-
+app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -118,31 +124,18 @@ app.use('/courses', courses);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
+app.use((req, res, next) => {
+  const err = new Error('Not Found');
   err.status = 404;
   next(err);
 });
 
-if (app.get('env') === 'development') {
-  app.use(function(err, req, res, next) {
-    res.status(err.status || 500);
-    res.render('error', {
-      message: err.message,
-      error: err
-    });
-  });
-}
-
-// production error handler
-// no stacktraces leaked to user
-app.use(function(err, req, res, next) {
+app.use((err, req, res) => {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
-    error: {}
+    error: (app.get('env') === 'development') ? err : {},
   });
 });
-
 
 module.exports = app;

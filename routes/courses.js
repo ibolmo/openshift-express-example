@@ -1,23 +1,21 @@
-var express = require('express');
-var router = express.Router();
+const express = require('express');
 
-var Course = require('../models/Course.js');
+const router = express.Router();  // eslint-disable-line new-cap
 
-/* GET home page. */
-router.get('/', function(req, res, next) {
-  Course.find(function(err, docs){
-    res.render('courses/index', { courses:  docs });
-  });
+const Course = require('../models/Course');
+
+router.get('/', (req, res) => {
+  Course.find((err, docs) => res.render('courses/index', { courses: docs }));
 });
 
-router.post('/', function(req, res, next) {
-  var course = new Course({
-    name: req.body.name
+router.post('/', (req, res) => {
+  const course = new Course({
+    name: req.body.name,
   });
-  course.save(function(err){
-    if (err) res.send('error ' + err);
+  course.save((err) => {
+    if (err) res.send(`error ${err}`);
     else res.redirect('/courses');
-  })
+  });
 });
 
 module.exports = router;

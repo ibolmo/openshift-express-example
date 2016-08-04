@@ -1,55 +1,54 @@
-var clock = document.getElementById('clock');
+/* global fetch document io FormData window */
 
-var updateClock = function(){
+const clock = document.getElementById('clock');
+
+function updateClock() {
   fetch('/time.json')
-    .then(function(response){
-      return response.json();
-    })
-    .then(function(json){
+    .then((response) => response.json())
+    .then((json) => {
       clock.innerText = new Date(Number(json.now));
     });
-};
+}
 
-var setUpForm = function(){
-  var status = document.getElementById('status');
-  var form = document.getElementById('myForm');
+function setUpForm() {
+  const status = document.getElementById('status');
+  const form = document.getElementById('myForm');
 
-  form.onsubmit = function(e){
+  form.onsubmit = (e) => {
     e.preventDefault();
     status.innerText = status.className = '';
 
     fetch('/message', {
       method: 'POST',
-      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: new FormData(form).get('message') })
-    }).then(function(response){
-      return response.json();
-    }).then(function(result){
+      headers: { Accept: 'application/json', 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: new FormData(form).get('message') }),
+    })
+    .then((response) => response.json())
+    .then((result) => {
       status.className = result.status;
       status.innerText = result.message;
     });
-  }
-};
+  };
+}
 
-var setUpSocket = function(){
-  var socket = io();
-
-  var form = document.getElementById('webSocketForm');
-  form.onsubmit = function(e){
+function setUpSocket() {
+  const socket = io();
+  const form = document.getElementById('webSocketForm');
+  form.onsubmit = (e) => {
     e.preventDefault();
     socket.emit('chat message', new FormData(form).get('message'));
     form.reset();
   };
 
-  var chat = document.getElementById('chat');
-  socket.on('chat message', function(msg){
-    var li = document.createElement('li');
+  const chat = document.getElementById('chat');
+  socket.on('chat message', (msg) => {
+    const li = document.createElement('li');
     li.innerText = msg;
     chat.appendChild(li);
   });
-};
+}
 
-window.onload = function(){
+window.onload = () => {
   setInterval(updateClock, 1000);
   setUpForm();
   setUpSocket();

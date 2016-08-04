@@ -1,21 +1,23 @@
-var express = require('express');
-var router = express.Router();
-var passport = require('passport')
+const express = require('express');
+const User = require('../models/User');
 
-var User = require('../models/User');
+const router = express.Router(); // eslint-disable-line new-cap
 
 /* GET users listing. */
-router.get('/', function(req, res, next) {
-  res.send('respond with a resource');
-});
+router.get('/', (req, res) => res.send('respond with a resource'));
 
-router.get('/:username', function(req, res, next) {
-  if (!req.user) return res.redirect('/login');
-
-  User.findOne({ username: req.params.username }, function(err, user){
-    if (err) return next(err);
-    res.render('users/profile', { user: user });
-  });
+router.get('/:username', (req, res, next) => {
+  if (!req.user) {
+    res.redirect('/login');
+  } else {
+    User.findOne({ username: req.params.username }, (err, user) => {
+      if (err) {
+        next(err);
+      } else {
+        res.render('users/profile', { user });
+      }
+    });
+  }
 });
 
 module.exports = router;

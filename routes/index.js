@@ -1,44 +1,42 @@
-var express = require('express');
-var router = express.Router();
-var passport = require('passport');
+const express = require('express');
+const passport = require('passport');
 
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
+const router = express.Router(); // eslint-disable-line new-cap
 
-router.get('/time.json', function(req, res, next){
-  res.send({ now: Date.now() });
-});
+router.get('/', (req, res) => res.render('index', { title: 'Express' }));
 
-router.post('/message', function(req, res, next){
-  if (req.body.message){
-  	return res.send({ status: 'success', message: 'Message (' + req.body.message + ') received' });
-  } else {
-  	return res.send({ status: 'error', message: 'Please provide message.' });
+router.get('/time.json', (req, res) => res.send({ now: Date.now() }));
+
+router.post('/message', (req, res) => {
+  if (req.body.message) {
+    return res.send({
+      status: 'success',
+      message: `Message (${req.body.message}) received`,
+    });
   }
+  return res.send({ status: 'error', message: 'Please provide message.' });
 });
 
-router.get('/jsonp', function(req, res, next){
-  res.send(req.query.callback + '(' + JSON.stringify({ hello: "World!" }) + ')');
+router.get('/jsonp', (req, res) => {
+  const json = JSON.stringify({ hello: 'World!' });
+  res.send(`${req.query.callback}(${json})`);
 });
 
-router.get('/login', function(req, res, next) {
-  res.render('login', { title: 'Login' });
+router.get('/login', (req, res) => res.render('login', { title: 'Login' }));
+
+router.post('/login', passport.authenticate('local'), (req, res) => {
+  res.redirect(`/users/${req.user.username}`);
 });
 
-router.post('/login', passport.authenticate('local'), function(req, res) {
-  res.redirect('/users/' + req.user.username);
-});
-
-router.get('/logout', function(req, res, next) {
+router.get('/logout', (req, res) => {
   req.logout();
   res.redirect('/');
 });
 
 router.get('/auth/facebook', passport.authenticate('facebook'));
 
-router.get('/auth/facebook/callback', passport.authenticate('facebook', { failureRedirect: '/login' }), function(req, res){
-  res.redirect('/');
-});
+router.get('/auth/facebook/callback',
+  passport.authenticate('facebook', { failureRedirect: '/login' }),
+  (req, res) => res.redirect('/'));
 
 module.exports = router;
